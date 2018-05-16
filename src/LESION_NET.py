@@ -9,43 +9,61 @@ class Lesion_net(nn.Module):
     def __init__(self):
         super(Lesion_net, self).__init__()
         self.activate = nn.LeakyReLU(0.01)
-        self.conv1 = nn.Conv2d(in_channels = 3, out_channels = 32, kernel_size = 3, stride = 2, padding=1)
-        self.norm1 = nn.BatchNorm2d(num_features = 32)
-
-        self.conv2 = nn.Conv2d(in_channels = 32, out_channels = 64, kernel_size = 3, stride = 2, padding=1)
+        self.norm1 = nn.BatchNorm2d(num_features=32)
         self.norm2 = nn.BatchNorm2d(num_features=64)
+        self.conv11 = nn.Conv2d(in_channels = 3, out_channels = 32, kernel_size = 3, stride = 1,padding=1)
+        # self.norm11 = nn.BatchNorm2d(num_features=32)
+        self.conv12 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, stride=1,padding=1)
 
-        self.conv3 = nn.Conv2d(in_channels = 64, out_channels = 128, kernel_size = 3, stride = 2, padding=1)
-        self.norm3 = nn.BatchNorm2d(num_features=128)
 
-        self.conv4 = nn.Conv2d(in_channels = 128, out_channels = 256, kernel_size = 3, stride = 2, padding=1)
-        self.norm4 = nn.BatchNorm2d(num_features=256)
+        self.conv21 = nn.Conv2d(in_channels = 32, out_channels = 64, kernel_size = 3, stride = 2, padding=1)
+        self.conv22 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
+        self.conv23 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
 
-        self.conv5 = nn.Conv2d(in_channels = 256, out_channels = 512, kernel_size = 3, stride = 2, padding=1)
-        self.norm5 = nn.BatchNorm2d(num_features=512)
+        # self.norm2 = nn.BatchNorm2d(num_features=64)
 
-        self.conv6 = nn.Conv2d(in_channels = 512, out_channels = 1024, kernel_size = 3, stride = 2, padding=1)
-        self.norm6 = nn.BatchNorm2d(num_features=1024)
+        self.conv31 = nn.Conv2d(in_channels = 64, out_channels = 64, kernel_size = 3, stride = 2, padding=1)
+        self.conv32 = nn.Conv2d(in_channels = 64, out_channels=64, kernel_size=3, stride=1, padding=1)
+        self.conv33 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
+        # self.norm3 = nn.BatchNorm2d(num_features=128)
 
-        self.dconv6 = nn.ConvTranspose2d(in_channels=1024, out_channels=512, kernel_size=3, stride=2, padding=1,output_padding=1)
-        self.norm7 = nn.BatchNorm2d(num_features=512)
+        self.conv41 = nn.Conv2d(in_channels = 64, out_channels = 64, kernel_size = 3, stride = 2, padding=1)
+        self.conv42 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
+        self.conv43 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
+        # self.norm4 = nn.BatchNorm2d(num_features=256)
 
-        self.dconv5 = nn.ConvTranspose2d(in_channels=1024, out_channels=256, kernel_size=3, stride=2, padding=1,output_padding=1)
-        self.norm8 = nn.BatchNorm2d(num_features=256)
+        self.conv51 = nn.Conv2d(in_channels = 64, out_channels = 64, kernel_size = 3, stride = 2, padding=1)
+        self.conv52 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
+        self.conv53 = nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=1,output_padding=1)
+        # self.norm5 = nn.BatchNorm2d(num_features=512)
 
-        self.dconv4 = nn.ConvTranspose2d(in_channels=512, out_channels=128, kernel_size=3, stride=2, padding=1,output_padding=1)
-        self.norm9 = nn.BatchNorm2d(num_features=128)
 
-        self.dconv3 = nn.ConvTranspose2d(in_channels=256, out_channels=64, kernel_size=3, stride=2, padding=1,output_padding=1)
-        self.norm10 = nn.BatchNorm2d(num_features=64)
+        # self.dconv = nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=1,output_padding=1)
+        self.conv61 = nn.Conv2d(in_channels=128, out_channels=64, kernel_size=3, stride=1, padding=1)
+        self.conv62 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
+        self.conv63 = nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=1,
+                                          output_padding=1)
+        # self.norm7 = nn.BatchNorm2d(num_features=512)
 
-        self.dconv2 = nn.ConvTranspose2d(in_channels=128, out_channels=32, kernel_size=3, stride=2, padding=1,output_padding=1)
-        self.norm11 = nn.BatchNorm2d(num_features=32)
+        # self.dconv71 = nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=1,output_padding=1)
+        self.conv71 = nn.Conv2d(in_channels=128, out_channels=64, kernel_size=3, stride=1, padding=1)
+        self.conv72 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
+        self.conv73 = nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=1,output_padding=1)
 
-        self.dconv1 = nn.ConvTranspose2d(in_channels=64, out_channels=1, kernel_size=3, stride=2, padding=1,output_padding=1)
-        self.norm12 = nn.BatchNorm2d(num_features=1)
 
-        self.func = nn.Sigmoid()
+        self.conv81 = nn.Conv2d(in_channels=128, out_channels=64, kernel_size=3, stride=1, padding=1)
+        self.conv82 = nn.Conv2d(in_channels=64, out_channels=64, kernel_size=3, stride=1, padding=1)
+        self.conv83 = nn.ConvTranspose2d(in_channels=64, out_channels=64, kernel_size=3, stride=2, padding=1,
+                                          output_padding=1)
+        # self.norm9 = nn.BatchNorm2d(num_features=128)
+
+        self.conv91 = nn.Conv2d(in_channels=96, out_channels=32, kernel_size=3, stride=1, padding=1)
+        self.conv92 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, stride=1, padding=1)
+        self.conv93 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3, stride=1, padding=1)
+        self.conv94 = nn.Conv2d(in_channels=32, out_channels=1, kernel_size=1, stride=1)
+
+
+        # self.func = nn.Sigmoid()
 
     def _init_weights(self):
         class_name = self.Lesion_net.__class__.__name__
@@ -55,42 +73,58 @@ class Lesion_net(nn.Module):
             self.Lesion_net.weight.data.normal_(1, 0.02)
 
     def forward(self, x):
-        out1 = self.func(self.norm1(self.conv1(x)))
-        out2 = self.func(self.norm2(self.conv2(out1)))
-        out3 = self.func(self.norm3(self.conv3(out2)))
-        out4 = self.func(self.norm4(self.conv4(out3)))
-        out5 = self.func(self.norm5(self.conv5(out4)))
-        out6 = self.func(self.norm6(self.conv6(out5)))
-        out7 = self.func(self.norm7(self.dconv6(out6)))
-        # print(out1.size(),out2.size(),out3.size(),out4.size(),out6.size())
-        input = torch.cat((out5,out7),1)
-        out8 = self.func(self.norm8(self.dconv5(input)))
-        input = torch.cat((out4,out8),1)
-        out9 = self.func(self.norm9(self.dconv4(input)))
-        input = torch.cat((out3,out9),1)
-        out10 = self.func(self.norm10(self.dconv3(input)))
-        input = torch.cat((out2,out10),1)
-        out11 = self.func(self.norm11(self.dconv2(input)))
-        input = torch.cat((out1,out11),1)
-        out12 = self.dconv1(input)
-        return out12
-        # return self.func(out12)
+        out_1 = self.conv12(self.conv11(x))
 
+        out1 = self.conv21(out_1)
+        out2 = self.conv22(out1)
+        input = out1+out2
+        out_2 = self.conv23(input)
+
+        out1 = self.conv31(out_2)
+        out2 = self.conv32(out1)
+        input = out1+out2
+        out_3 = self.conv33(input)
+
+        out1 = self.conv41(out_3)
+        out2 = self.conv42(out1)
+        input = out1+out2
+        out_4 = self.conv43(input)
+
+        out1 = self.conv51(out_4)
+        out2 = self.conv52(out1)
+        input = out1+out2
+        out_5 = self.conv53(input)
+
+
+        input = torch.cat((out_4,out_5),1)
+        out1 = self.conv61(input)
+        out2 = self.conv62(out1)
+        input = out1+out2
+        out_6 = self.conv63(input)
+
+        input = torch.cat((out_3,out_6),1)
+        out1 = self.conv71(input)
+        out2 = self.conv72(out1)
+        input = out1+out2
+        out_7 = self.conv73(input)
+
+        input = torch.cat((out_2, out_7), 1)
+        out1 = self.conv81(input)
+        out2 = self.conv82(out1)
+        input = out1+out2
+        out_8 = self.conv83(input)
+
+        input = torch.cat((out_1, out_8), 1)
+        out1 = self.conv91(input)
+        out2 = self.conv92(out1)
+        input = out1+out2
+        out_9 = self.conv93(input)
+        return self.conv94(out_9)
 
 if __name__ == '__main__':
 
-    input = Variable(torch.randn(4, 3, 1024, 1024))
-    # let  = Lesion_net()
-    A = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=1, stride=1)
-    # B = nn.ConvTranspose2d(in_channels=32, out_channels=1, kernel_size=3, stride=2, padding=1,output_padding=1)
-
-    # A = nn.Conv2d( in_channels=5,   out_channels=64,  kernel_size=5, stride=2, padding=2 )
-    # B = nn.Conv2d( in_channels=64,  out_channels=128, kernel_size=5, stride=2, padding=2 )
-    # C = nn.Conv2d( in_channels=128, out_channels=256, kernel_size=5, stride=2, padding=2 )
-    # E = nn.Conv2d( in_channels=256, out_channels=512, kernel_size=5, stride=2, padding=2 )
-    # F = nn.ConvTranspose3d( in_channels=512, out_channels=256, kernel_size=5, stride=2, padding=2, output_padding=1 )
-    # D = torch.nn.DataParallel(discriminator(length).apply(weight_init)).cuda()  # discriminator model
-    # DE = torch.nn.DataParallel(encoder(length,latent).apply(weight_init)).cuda()
-    # output =B(A(input))
-    output = A(input)
-    print(output.size())
+    input = Variable(torch.randn(4, 3, 720, 720))
+    les = Lesion_net()
+    conv11 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=3, stride=1, padding=1)
+    out = les(input)
+    print(out.size())
