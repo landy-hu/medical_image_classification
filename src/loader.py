@@ -17,6 +17,7 @@ class DatasetFromFolder(data.Dataset):
         self.path=path
         super(DatasetFromFolder, self).__init__()
         self.mode1 =mode1
+        self.res = 720
         self.dirMask =[]
         self.dirOriginal=[]
         self.mode2 = mode2
@@ -25,22 +26,23 @@ class DatasetFromFolder(data.Dataset):
             # print(x[-3:])
             if x[-3:] == 'tif':
                 self.dirMask.append(join(self.path, self.mode2, x))
-                temp = x[:8]+x[-8:-4]+'.jpg'
+                temp = x[:8]+x[-9:-4]+'.jpg'
                 # print(temp)
                 # print(temp)
                 self.dirOriginal.append(join(self.path, self.mode1, temp))
 
     def __getitem__(self, index):
-        img = np.array(Image.open(self.dirMask[index]).resize((1024,1024))).astype(np.float32)
+        img = np.array(Image.open(self.dirMask[index]).resize((self.res,self.res))).astype(np.float32)
         img[np.where(img>0)]=255
         data1 = filters.gaussian_filter(img,3)
         # print(data1)
         # print(data1[np.where(data1>0)])
         # print(self.dirOriginal[index])
-        data2 = np.array(Image.open(self.dirOriginal[index]).resize((1024,1024))).astype(np.float32)
-        data = np.zeros((4,1024,1024))
+        data2 = np.array(Image.open(self.dirOriginal[index]).resize((self.res,self.res))).astype(np.float32)
+        data = np.zeros((4,self.res,self.res))
         data[0,:,:] = data1
         data[1:,:,:]=data2.transpose((2,0,1))
+        # print(data.shape)
         return data
     def __len__(self):
         return len(self.dirMask)

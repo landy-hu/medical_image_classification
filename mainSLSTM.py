@@ -23,13 +23,13 @@ class options():
         self.lam = 0.1
         self.tau =1
         self.mu =1
-        self.batch_size = 10# training batch size
+        self.batch_size = 5# training batch size
         self.num_epochs = 500  # umber of epochs to train for
         self.learning_rate = 0.0001
         self.dataPath  = '/home/mpl/medical_image_classification/ISBI_DATASET'
         self.layers = 10
         self.vols = 100
-        self.num_feature = 1024
+        self.num_feature = 720
 
 def train(Lesnet, train_dataset, val_dataset, options, epoch):
     lossData = 0
@@ -79,11 +79,11 @@ if __name__ == '__main__':
     options = options()
     if not os.path.exists("checkpoints"):
         os.makedirs("checkpoints")
-    train_dataset = DataLoader( get_train_data(options.dataPath,'originalEnColor','fusedImage'), options.batch_size, shuffle=True)
-    val_dataset = DataLoader( get_train_data(options.dataPath,'valiOriginalEnColor','valiFusedImage'), options.batch_size, shuffle=True)
+    train_dataset = DataLoader( get_train_data(options.dataPath,'trainInput','trainGroundTruth'), options.batch_size, shuffle=True)
+    val_dataset = DataLoader( get_train_data(options.dataPath,'valiInput','valiGroundTruth'), options.batch_size, shuffle=True)
     Lesnet = torch.nn.DataParallel(Lesion_net()).cuda()
-    Lesnet.load_state_dict(torch.load('/home/mpl/medical_image_classification/checkpoints/Lesnet90.pth.tar'))
+    # Lesnet.load_state_dict(torch.load('/home/mpl/medical_image_classification/checkpoints/Lesnet90.pth.tar'))
     for epoch in range(1, options.num_epochs):
         train(Lesnet, train_dataset, val_dataset, options, epoch)
         if (epoch+1) % 10 == 0:
-            save_checkpoint(Lesnet.state_dict(), filename='Lesnet{}.pth.tar'.format(epoch + 1), dir="checkpoints")
+            save_checkpoint(Lesnet.state_dict(), filename='Stack_Lesnet{}.pth.tar'.format(epoch + 1), dir="checkpoints")
