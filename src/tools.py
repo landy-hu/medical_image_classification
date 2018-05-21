@@ -16,13 +16,20 @@ def save_checkpoint(state, filename='checkpoint.pth.tar', dir=None):
     shutil.copyfile(os.path.join(dir, filename),
                     os.path.join(dir, 'latest.pth.tar'))
     return
-def show(input):
+def show(input,flag):
     input = input.data.cpu().numpy()
     input = input[0, 0]
     # input[input>0]=255
     # print(input.shape)
     # image = np.array(input[np.where(input > 0.5))
-    images = img.fromarray(input)
+    if flag==1:
+        # input = input[0]
+        # print(input.shape)
+        images = img.fromarray(input)
+    else:
+        # input = input[0, 0]
+        images = img.fromarray(255*input)
+
     images.show()
     # io.imshow(input)
     # images.pause(1)

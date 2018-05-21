@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
+from __future__ import print_function
 __author__ = 'lan hu'
-from torch.autograd import Variable
 from torch.utils.data import DataLoader
 import torchvision.models as models
 import torch.nn.functional as F
 import torch.nn
 import os
+from torch.autograd import Variable
 from PIL import Image
 from src.tools import *
 import torchvision.transforms as transforms
@@ -13,8 +14,15 @@ from src.LESION_NET import Lesion_net
 from src.loader import get_train_data
 import torch.cuda
 import numpy as np
-def loss(x,xx):
-    loss = F.mse_loss(x,xx)
+def loss(x,mask,mask1,mask0,f):
+    # error = mask-x
+    temp = (mask-x).data.cpu().numpy()
+    idx1 = np.where(temp>0.5) #true positive
+    idx0 = np.where(temp<-0.5) #
+    loss1 = f(x*mask1,mask*mask1)
+    loss2 = f(x*mask0,mask*mask0)
+    #loss2 = torch.norm(error[torch.LongTensor(idx0)])
+    loss = idx1[0].shape[0]/idx0[0].shape[0]*loss1+loss2
     # loss +=options.lam*l1_loss(s)
     return loss
 
@@ -26,10 +34,11 @@ class options():
         self.batch_size = 5# training batch size
         self.num_epochs = 500  # umber of epochs to train for
         self.learning_rate = 0.0001
-        self.dataPath  = '/home/mpl/medical_image_classification/ISBI_DATASET'
+        self.dataPath  = '/home/mpl/medical_image_classification/ISBI_DATASET/Lesion_Segmentation/'
         self.layers = 10
         self.vols = 100
-        self.num_feature = 720
+        self.num_feature = 1024
+        self.f = nn.MSELoss()
 
 def train(Lesnet, train_dataset, val_dataset, options, epoch):
     lossData = 0
@@ -41,18 +50,29 @@ def train(Lesnet, train_dataset, val_dataset, options, epoch):
             for j, val_data in enumerate(val_dataset):
                 if val_data.size(0) < options.batch_size:
                     print('val---Epoch [{}/{}/{}], loss: {:.6f}'.format(i, epoch, options.num_epochs, lossData_val / j))
-                    show(xx_val)
-                    show(input)
-                    show(mask)
+                    show(xx_val,0)
+                    # show(input,1)
+                    show(mask,0)
                     continue
                 input = torch.zeros(options.batch_size, 3, options.num_feature, options.num_feature)
                 mask = torch.zeros(options.batch_size, 1, options.num_feature, options.num_feature)
+                mask1 = np.zeros((options.batch_size, 1, options.num_feature, options.num_feature))
+                mask0 = np.zeros((options.batch_size, 1, options.num_feature, options.num_feature))
+                idx1 = np.where(mask.numpy() == 1)
+                # print(idx1)
+                idx0 = np.where(mask.numpy() == 0)
+                # print(idx0)
+                mask1[idx1] = 1
+                mask0[idx0] = 1
+                mask1 = Variable(torch.from_numpy(mask1), requires_grad=False).float().cuda()
+                mask0 = Variable(torch.from_numpy(mask0), requires_grad=False).float().cuda()
+
                 mask[:, :, :, :] = val_data[:, 0]
                 input[:, :, :, :] = val_data[:, 1:]
                 input = Variable(input).float().cuda()
                 mask = Variable(mask).float().cuda()
                 xx_val = Lesnet(input)
-                loss_lesnet_val = loss(xx_val, mask)
+                loss_lesnet_val = loss(xx_val, mask,mask1,mask0,options.f)
                 lossData_val += loss_lesnet_val.data[0]
             print('train---Epoch [{}/{}/{}], loss: {:.6f}'.format(i, epoch, options.num_epochs, lossData/i))
             # show(xx)
@@ -60,13 +80,23 @@ def train(Lesnet, train_dataset, val_dataset, options, epoch):
         else:
             input = torch.zeros(options.batch_size, 3, options.num_feature, options.num_feature)
             mask = torch.zeros(options.batch_size, 1, options.num_feature, options.num_feature)
+            mask1 = np.zeros((options.batch_size,1,options.num_feature,options.num_feature))
+            mask0 = np.zeros((options.batch_size,1,options.num_feature,options.num_feature))
+            idx1 = np.where(mask.numpy()==1)
+            #print(idx1)
+            idx0 = np.where(mask.numpy()==0)
+            #print(idx0)
+            mask1[idx1]=1
+            mask0[idx0]=1
+            mask1 = Variable(torch.from_numpy(mask1),requires_grad=False).float().cuda()
+            mask0 = Variable(torch.from_numpy(mask0),requires_grad=False).float().cuda()
             mask[:, :, :, :] = data[:, 0]
             input[:,:,:,:]=data[:,1:]
             input = Variable(input).float().cuda()
             mask = Variable(mask).float().cuda()
             lesnet_optimizer.zero_grad()
             xx = Lesnet(input)
-            loss_lesnet = loss(xx,mask)
+            loss_lesnet = loss(xx,mask,mask1,mask0,options.f)
             loss_lesnet.backward()
             lesnet_optimizer.step()
             lossData += loss_lesnet.data[0]
@@ -82,8 +112,8 @@ if __name__ == '__main__':
     train_dataset = DataLoader( get_train_data(options.dataPath,'trainInput','trainGroundTruth'), options.batch_size, shuffle=True)
     val_dataset = DataLoader( get_train_data(options.dataPath,'valiInput','valiGroundTruth'), options.batch_size, shuffle=True)
     Lesnet = torch.nn.DataParallel(Lesion_net()).cuda()
-    # Lesnet.load_state_dict(torch.load('/home/mpl/medical_image_classification/checkpoints/Lesnet90.pth.tar'))
-    for epoch in range(1, options.num_epochs):
+    Lesnet.load_state_dict(torch.load('/home/mpl/medical_image_classification/checkpoints/Stack2_Lesnet15.pth.tar'))
+    for epoch in range(15, options.num_epochs):
         train(Lesnet, train_dataset, val_dataset, options, epoch)
-        if (epoch+1) % 10 == 0:
-            save_checkpoint(Lesnet.state_dict(), filename='Stack_Lesnet{}.pth.tar'.format(epoch + 1), dir="checkpoints")
+        if (epoch+1) % 5 == 0:
+            save_checkpoint(Lesnet.state_dict(), filename='Stack2_Lesnet{}.pth.tar'.format(epoch + 1), dir="checkpoints")
