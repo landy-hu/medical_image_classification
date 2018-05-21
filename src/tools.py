@@ -12,11 +12,10 @@ from skimage import io
 
 def save_checkpoint(state, filename='checkpoint.pth.tar', dir=None):
     torch.save(state, os.path.join(dir, filename))
-
     shutil.copyfile(os.path.join(dir, filename),
                     os.path.join(dir, 'latest.pth.tar'))
     return
-def show(input,flag):
+def show(input,flag=1):
     input = input.data.cpu().numpy()
     input = input[0, 0]
     # input[input>0]=255

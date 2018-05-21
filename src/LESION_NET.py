@@ -9,6 +9,7 @@ class Lesion_net(nn.Module):
     def __init__(self):
         super(Lesion_net, self).__init__()
         self.activate = nn.LeakyReLU(0.01)
+        self.activate2= nn.ReLU()
         self.conv1 = nn.Conv2d(in_channels=3, out_channels=32, kernel_size=5, stride=2, dilation=2, padding=4,bias=False)
         self.norm1 = nn.BatchNorm2d(num_features = 32)
         self.conv11 = nn.Conv2d(in_channels=32, out_channels=32, kernel_size=3,padding=1,bias=False)
@@ -81,7 +82,7 @@ class Lesion_net(nn.Module):
         out11 = self.activate(self.norm11(self.dconv2(input)))
         input = torch.cat((self.activate(self.norm1(self.conv11(out1)))+out1,out11),1)
         out12 = self.norm12(self.dconv1(input))
-        return self.conv0(out12)
+        return self.activate2(self.conv0(out12))
 
 if __name__ == '__main__':
     input = Variable(torch.randn(10, 3, 1024, 1024))

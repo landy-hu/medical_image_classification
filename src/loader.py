@@ -49,16 +49,13 @@ class DatasetFromFolder(data.Dataset):
                 self.dirOriginal.append(join(self.path, self.mode1, temp))
 
     def __getitem__(self, index):
-        mask = Image.open(self.dirMask[index]).resize((1024,1024))
-        image = Image.open(self.dirOriginal[index]).resize((1024,1024))
-        mask = np.array(mask)
-        image = np.array(image)
+        mask = np.array(Image.open(self.dirMask[index]).resize((1024, 1024))).astype(np.float32)
+        mask[np.where(mask > 0)] = 255
+        image = np.array(Image.open(self.dirOriginal[index]).resize((1024, 1024))).astype(np.float32)
         data = np.zeros((4, 1024,1024))
         data[0, :, :] = mask
         data[1:, :, :] = image.transpose((2, 0, 1))
-
         return data
-        # return data
     def __len__(self):
         return len(self.dirMask)
 
