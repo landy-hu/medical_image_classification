@@ -49,23 +49,15 @@ class DatasetFromFolder(data.Dataset):
                 self.dirOriginal.append(join(self.path, self.mode1, temp))
 
     def __getitem__(self, index):
-        # print(self.dirMask[index],self.dirOriginal[index])
-        # self.dirOriginal[index]
-        mask = Image.open(self.dirMask[index])
-        top = np.random.randint(0, 2196)
-        left = np.random.randint(0,2196)
-        # print(top+1204,left+1204)
-        image = Image.open(self.dirOriginal[index])
-        # seed = np.random.randint(2147483647)
+        mask = Image.open(self.dirMask[index]).resize((1024,1024))
+        image = Image.open(self.dirOriginal[index]).resize((1024,1024))
         mask = np.array(mask)
-        # random.seed(seed)
         image = np.array(image)
-        # print(image.shape)
-        data = np.zeros((4, 3400,3400))
+        data = np.zeros((4, 1024,1024))
         data[0, :, :] = mask
         data[1:, :, :] = image.transpose((2, 0, 1))
 
-        return data[:,top:top+1024,left:left+1024]
+        return data
         # return data
     def __len__(self):
         return len(self.dirMask)
@@ -78,15 +70,15 @@ if __name__=='__main__':
     for i, data in enumerate(train_dataset):
         input = torch.zeros(10, 3, 1024, 1024)
         mask = torch.zeros(10, 1, 1024, 1024)
-        input = torch.zeros(10, 3, 3400, 3400)
-        mask = torch.zeros(10, 1, 3400, 3400)
+        # input = torch.zeros(10, 3, 3400, 3400)
+        # mask = torch.zeros(10, 1, 3400, 3400)
         print(data.size())
         mask[:, :, :, :] = data[:, 0,:,:]
         input[:, :, :, :] = data[:, 1:,:,:]
         input = Variable(input).float().cuda()
         mask = Variable(mask).float().cuda()
         # show(xx_val, 0)
-        show(input, 1)
-        show(mask, 0)
+        # show(input, 1)
+        # show(mask, 0)
         print(data.size())
 

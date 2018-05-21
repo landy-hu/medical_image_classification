@@ -5,12 +5,16 @@ import os
 import numpy as np
 import concurrent.futures
 import socket
-
+import shutil
 scale = 500
 pool_size = 20
-image_folder = '/home/mpl/medical_image_classification/ISBI_DATASET/original'
-save_folder = '/home/mpl/medical_image_classification/ISBI_DATASET/originalEnColor'
-
+image_folder = '/home/mpl/medical_image_classification/ISBI_DATASET/Lesion_Segmentation/Apparent_Retinopathy/'
+save_folder = '/home/mpl/medical_image_classification/ISBI_DATASET/Lesion_Segmentation/originalEnColor_stack_unet/'
+if not os.path.exists(save_folder):
+    os.makedirs(save_folder)
+else:
+    shutil.rmtree(save_folder)
+    os.makedirs(save_folder)
 def scaleRadius(img, scale):
     x = img[img.shape[0]//2, :, :].sum(1)   #
     r = (x>x.mean()/10).sum()/2
